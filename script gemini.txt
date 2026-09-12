@@ -1,0 +1,105 @@
+repeat wait() until game:IsLoaded() and game.Players.LocalPlayer 
+getgenv().team = "Marines" --  Marines or Pirates
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Stats = game:GetService("Stats")
+
+-- DỌN DẸP UI CŨ NẾU CÓ
+if PlayerGui:FindFirstChild("SH4RK_HUB_GEMINI") then PlayerGui.SH4RK_HUB_GEMINI:Destroy() end
+
+-- 1. TẠO GIAO DIỆN (UI)
+local Screen = Instance.new("ScreenGui", PlayerGui)
+Screen.Name = "SH4RK_HUB_GEMINI"
+
+-- Main Frame (Khung Full)
+local MainFrame = Instance.new("Frame", Screen)
+MainFrame.Size = UDim2.new(0, 220, 0, 220)
+MainFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+
+-- Mini Frame (Khung Thu Nhỏ)
+local MiniFrame = Instance.new("Frame", Screen)
+MiniFrame.Size = UDim2.new(0, 160, 0, 80)
+MiniFrame.Position = MainFrame.Position
+MiniFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MiniFrame.Visible = false
+MiniFrame.Active = true
+MiniFrame.Draggable = true
+Instance.new("UICorner", MiniFrame).CornerRadius = UDim.new(0, 10)
+
+-- Tiêu đề Hub
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.Text = "SH4RK HUB by NHÂN NGUYỄN x GEMINI"
+Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 9
+
+-- FPS & PING (Hiển thị trong Full UI)
+local StatsDisplay = Instance.new("TextLabel", MainFrame)
+StatsDisplay.Size = UDim2.new(1, 0, 0, 20)
+StatsDisplay.Position = UDim2.new(0, 0, 0, 30)
+StatsDisplay.Text = "FPS: ... | PING: ..."
+StatsDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatsDisplay.BackgroundTransparency = 1
+StatsDisplay.Font = Enum.Font.Code
+StatsDisplay.TextSize = 12
+
+-- 2. HÀM FIX LAG HARDCORE
+local function HardcoreFix()
+    Lighting.GlobalShadows = false
+    for _, v in pairs(Lighting:GetChildren()) do if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("PostEffect") then v:Destroy() end end
+    
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Decal") or v:IsA("Texture") then v:Destroy() end
+        if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") then v.Enabled = false end
+        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic v.CastShadow = false end
+    end
+end
+
+-- 3. TẠO NÚT BẤM
+local function AddBtn(parent, txt, pos, color, func)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(0.9, 0, 0, 45)
+    btn.Position = pos
+    btn.BackgroundColor3 = color
+    btn.Text = txt
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    btn.MouseButton1Click:Connect(func)
+    return btn
+end
+
+AddBtn(MainFrame, "HARDCORE FIX LAG", UDim2.new(0.05, 0, 0.45, 0), Color3.fromRGB(0, 150, 255), HardcoreFix)
+
+-- 4. LOOP CẬP NHẬT FPS & PING
+RunService.RenderStepped:Connect(function(dt)
+    local fps = math.floor(1/dt)
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    local text = "FPS: " .. fps .. " | PING: " .. ping .. "ms"
+    
+    StatsDisplay.Text = text
+    if MiniFrame.Visible then -- Cập nhật cả ở khung mini
+        MiniFrame:FindFirstChild("MiniStats").Text = text
+    end
+end)
+
+-- 5. MINISIZE & MAXIMIZE
+local MiniBtn = Instance.new("TextButton", MainFrame)
+MiniBtn.Size = UDim2.new(0, 30, 0, 30); MiniBtn.Position = UDim2.new(1, -35, 0, 5); MiniBtn.Text = "-"
+MiniBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false; MiniFrame.Visible = true; MiniFrame.Position = MainFrame.Position end)
+
+local MiniStats = Instance.new("TextLabel", MiniFrame)
+MiniStats.Name = "MiniStats"
+MiniStats.Size = UDim2.new(1, 0, 1, 0); MiniStats.BackgroundTransparency = 1; MiniStats.TextColor3 = Color3.fromRGB(0, 255, 127); MiniStats.Font = Enum.Font.Code
+
+local MaxBtn = Instance.new("TextButton", MiniFrame)
+MaxBtn.Size = UDim2.new(0, 30, 0, 30); MaxBtn.Position = UD
